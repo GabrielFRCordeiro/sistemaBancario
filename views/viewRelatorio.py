@@ -1,18 +1,25 @@
 from flet import (UserControl, Container, ElevatedButton, icons, colors, LineChartData,
                   LineChartDataPoint, LineChart, Border, BorderSide, ChartAxisLabel, ChartAxis,
                   Text, FontWeight, margin, DatePicker, TextField, Dropdown, dropdown,
-                  ResponsiveRow, Column, MainAxisAlignment, IconButton)
+                  ResponsiveRow, Column, MainAxisAlignment, IconButton, ButtonStyle,
+                  MaterialState, RoundedRectangleBorder, Row, CrossAxisAlignment)
 from datetime import datetime
+from sistemaBancario.utils.paletaCores import CoresAplicacao
+
 
 class ViewRelatorio(UserControl):
     def __init__(self):
         super().__init__()
+        self.cores = CoresAplicacao()
         self.calendario = DatePicker(
             first_date=datetime(year=2010, month=1, day=1),
             last_date=datetime(year=2045, month=1, day=1)
         )
         self.t_field_calendario = TextField(label='Data')
-        self.btn_calendario = IconButton(icon=icons.CALENDAR_TODAY)
+        self.btn_calendario = IconButton(icon=icons.CALENDAR_TODAY,
+                                         icon_color=self.cores.corDefault,
+                                         icon_size=35
+                                         )
         self.grafico = LineChart(
             data_series=self.dados1(),
             border=Border(
@@ -28,22 +35,35 @@ class ViewRelatorio(UserControl):
             # animate=5000,
             expand=True
         )
-        self.btn_pesquisar = ElevatedButton(text='Pesquisar', icon=icons.SEARCH)
+        self.btn_pesquisar = ElevatedButton(text='Pesquisar',
+                                            icon=icons.SEARCH,
+                                            expand=True,
+                                            style=ButtonStyle(
+                                                color=self.cores.corBranca,
+                                                bgcolor={
+                                                    MaterialState.DEFAULT: self.cores.corDefault,
+                                                    MaterialState.HOVERED: self.cores.corHover
+                                                }, shape=RoundedRectangleBorder(radius=5)
+                                            ))
         self.barra = Container()
         self.dropCategoria = Dropdown(
+            label='Categorias',
             options=self.carregarCategorias()
         )
 
     def build(self):
+        linhaBtnPesquisar = Row(col=12,
+                                controls=[self.btn_pesquisar],
+                                alignment=MainAxisAlignment.CENTER,
+                                )  # fim da linhaBtnPesquisar
         barraOpcoes = ResponsiveRow(controls=[
             Column(col={'md': 3}, controls=[self.t_field_calendario]),
             Column(col=1, controls=[self.btn_calendario]),
             Column(col={'md': 4}, controls=[self.dropCategoria]),
-            Column(col={'md': 2}, controls=[self.btn_pesquisar])
-        ], alignment=MainAxisAlignment.CENTER)
+            Column(col={'md': 2}, controls=[linhaBtnPesquisar])
+        ], alignment=MainAxisAlignment.CENTER, vertical_alignment=CrossAxisAlignment.CENTER)  # fim da barraOpcoes
         grafico = ResponsiveRow(controls=[Container(content=self.grafico)])
         return Column(controls=[barraOpcoes, grafico])
-
 
     def dados1(self) -> list:
         """
